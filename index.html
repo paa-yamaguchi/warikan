@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプル割り勘計算ツール</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .number-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .calculate-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .results {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .per-person {
+            font-size: 24px;
+            color: #4CAF50;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .expense-list {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .expense-item {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>シンプル割り勘計算ツール</h1>
+        
+        <div class="input-group">
+            <label for="expenseInput">支出金額（1行に1つの金額を入力）:</label>
+            <textarea id="expenseInput" placeholder="例：
+1000
+500
+750
+1200"></textarea>
+        </div>
+        
+        <div class="input-group">
+            <label for="numPeople">人数:</label>
+            <input type="number" id="numPeople" class="number-input" min="1" value="1">
+        </div>
+        
+        <button id="calculate" class="calculate-btn">計算する</button>
+        
+        <div class="results" id="results">
+            <div class="total">合計金額: <span id="totalAmount">0</span>円</div>
+            <div class="per-person">一人当たり: <span id="perPersonAmount">0</span>円</div>
+        </div>
+        
+        <div class="expense-list" id="expenseList">
+            <p>入力された金額は以下の通りです：</p>
+            <div id="expenseItems"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculate');
+            const expenseInput = document.getElementById('expenseInput');
+            const numPeopleInput = document.getElementById('numPeople');
+            const totalAmountDisplay = document.getElementById('totalAmount');
+            const perPersonAmountDisplay = document.getElementById('perPersonAmount');
+            const expenseItems = document.getElementById('expenseItems');
+            
+            // 計算ボタンのイベントリスナー
+            calculateBtn.addEventListener('click', function() {
+                // テキストエリアから入力値を取得し、行ごとに分割
+                const lines = expenseInput.value.trim().split('\n');
+                let total = 0;
+                let validExpenses = [];
+                
+                // 各行を処理
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        const amount = parseFloat(line);
+                        if (!isNaN(amount) && amount >= 0) {
+                            total += amount;
+                            validExpenses.push(amount);
+                        }
+                    }
+                }
+                
+                // 人数を取得
+                const numPeople = parseInt(numPeopleInput.value) || 1;
+                
+                // 一人当たりの金額を計算（切り上げ）
+                const perPerson = Math.ceil(total / numPeople);
+                
+                // 結果を表示
+                totalAmountDisplay.textContent = total.toLocaleString();
+                perPersonAmountDisplay.textContent = perPerson.toLocaleString();
+                
+                // 入力された金額の一覧を表示
+                expenseItems.innerHTML = '';
+                if (validExpenses.length > 0) {
+                    validExpenses.forEach((expense, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'expense-item';
+                        item.textContent = `${index + 1}. ${expense.toLocaleString()}円`;
+                        expenseItems.appendChild(item);
+                    });
+                } else {
+                    expenseItems.textContent = '有効な金額が入力されていません。';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
